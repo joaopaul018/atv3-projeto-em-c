@@ -23,9 +23,7 @@ typedef struct
     char id[MAX_ID_LEN];
     DataType type;
 } Sensor;
-
-// Função que retorna o tipo como string no novo formato
-const char* get_type_label(DataType type) {
+ const char* get_type_label(DataType type){
     switch (type) {
         case INT:   return "CONJ_Z";
         case FLOAT: return "CONJ_Q";
