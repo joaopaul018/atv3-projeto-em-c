@@ -24,36 +24,16 @@ typedef struct
     DataType type;
 } Sensor;
 
-
-void generate_value(DataType type, char* buffer, size_t size)
- {
-    switch (type) 
-    {
-        case INT:
-            snprintf(buffer, size, "%d", rand() % 1000);
-            break;
-        case BOOL:
-            strcpy(buffer, (rand() % 2) ? "true" : "false");
-            break;
-        case FLOAT:
-            snprintf(buffer, size, "%.2f", ((double)(rand() % 1000)) / 10.0);
-            break;
-        case STR: 
-        {
-            const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            int len = rand() % 16 + 1;
-            for (int i = 0; i < len && i < 16; i++) 
-            {
-                buffer[i] = charset[rand() % (sizeof(charset) - 1)];
-            }
-            buffer[len < 16 ? len : 15] = '\0';
-            break;
-        }
-        default:
-            strcpy(buffer, "invalid");
+// Função que retorna o tipo como string no novo formato
+const char* get_type_label(DataType type) {
+    switch (type) {
+        case INT:   return "CONJ_Z";
+        case FLOAT: return "CONJ_Q";
+        case BOOL:  return "BINARIO";
+        case STR:   return "TEXTO";
+        default:    return "DESCONHECIDO";
     }
 }
-
 
 long random_timestamp(long start, long end) 
 {
@@ -92,14 +72,12 @@ int main()
     {
         Sensor s = sensors[i];
 
-      for (int j = 0; j < SAMPLES_PER_SENSOR; j++) 
-{
-    long timestamp = random_timestamp(start_time, end_time);
-    char value[MAX_VAL_LEN];
-    generate_value(s.type, value, sizeof(value));
-    fprintf(fp, "%s %ld %s\n", s.id, timestamp, value);  
-}
-
+        for (int j = 0; j < SAMPLES_PER_SENSOR; j++) 
+        {
+            long timestamp = random_timestamp(start_time, end_time);
+            const char* value_label = get_type_label(s.type);
+            fprintf(fp, "%s %ld %s\n", s.id, timestamp, value_label);  
+        }
     }
 
     fclose(fp);
