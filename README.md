@@ -6,10 +6,13 @@ Este projeto é um gerador de dados simulados de sensores, escrito em linguagem 
 ### Funcionalidade
 
 O programa gera dados para 4 sensores fictícios:
-- `sensor1` → Inteiro (`INT`)
-- `sensor2` → Float (`FLOAT`)
-- `sensor3` → Booleano (`BOOL`)
-- `sensor4` → String (`STR`)
+CONJ_Z:  para dados tipo inteiro
+
+CONJ_Q: para dados do tipo float
+
+TEXTO para dados do tipo string
+
+BINARIO: para dados do tipo booleano.
 
 Cada sensor gera 2000 amostras, totalizando 8000 linhas.
 
