@@ -26,3 +26,7 @@ sensor2 1700001050 23.45
 sensor3 1700001075 true
 
 sensor4 1700001100 aB8xZ
+
+### como executar:
+gcc -o gera_teste gera_teste.c
+./gera_teste
