@@ -29,4 +29,5 @@ sensor4 1700001100 aB8xZ
 
 ### como executar:
 gcc -o gera_teste gera_teste.c
+
 ./gera_teste
