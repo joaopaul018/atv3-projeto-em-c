@@ -17,7 +17,6 @@ typedef enum
     UNKNOWN
 } DataType;
 
-
 typedef struct 
 {
     char id[MAX_ID_LEN];
@@ -26,8 +25,7 @@ typedef struct
 
 const char* get_type_label(DataType type) 
 {
-    switch (type) 
-    {
+    switch (type) {
         case INT:   return "CONJ_Z";
         case FLOAT: return "CONJ_Q";
         case BOOL:  return "BINARIO";
@@ -45,19 +43,20 @@ DataType get_data_type_from_input(const char* input)
     return UNKNOWN;
 }
 
-long random_timestamp(long start, long end) 
+long random_timestamp(long start, long end)
 {
     return start + (rand() % (end - start + 1));
 }
 
-void generate_value(DataType type, char* buffer, size_t size) 
-{
-    switch (type) {
+void generate_value(DataType type, char* buffer, size_t size)
+ {
+    switch (type) 
+    {
         case INT:
             snprintf(buffer, size, "%d", rand() % 1000);
             break;
         case BOOL:
-            strcpy(buffer, (rand() % 2) ? "true" : "false");
+            snprintf(buffer, size, "%s", (rand() % 2) ? "true" : "false");
             break;
         case FLOAT:
             snprintf(buffer, size, "%.2f", ((double)(rand() % 1000)) / 10.0);
@@ -66,25 +65,62 @@ void generate_value(DataType type, char* buffer, size_t size)
         {
             const char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             int len = rand() % 16 + 1;
-            for (int i = 0; i < len && i < 16; i++) 
+            for (int i = 0; i < len && i < (int)size - 1; i++) 
             {
                 buffer[i] = charset[rand() % (sizeof(charset) - 1)];
             }
-            buffer[len < 16 ? len : 15] = '\0';
+            buffer[len < (int)size - 1 ? len : (int)size - 1] = '\0';
             break;
         }
         default:
-            strcpy(buffer, "invalid");
+            snprintf(buffer, size, "invalid");
     }
+}
+
+
+void validate_file_lines(const char* filename) 
+{
+    FILE* fp = fopen(filename, "r");
+    if (!fp) 
+    {
+        perror("Erro ao abrir arquivo para validacao");
+        return;
+    }
+
+    char line[1024];
+    int line_number = 0;
+
+    while (fgets(line, sizeof(line), fp)) 
+    {
+        line_number++;
+
+        char sensor_id[MAX_ID_LEN], value[MAX_VAL_LEN];
+        long timestamp;
+        int items = sscanf(line, "%s %ld %s", sensor_id, &timestamp, value);
+
+        if (items != 3) 
+        {
+            printf("Linha %d: Formato invalido (esperado: <id> <timestamp> <valor>)\n", line_number);
+        } else if (strlen(sensor_id) >= MAX_ID_LEN) 
+        {
+            printf("Linha %d: ID muito longo\n", line_number);
+        } else if (strlen(value) >= MAX_VAL_LEN) 
+        {
+            printf("Linha %d: Valor muito longo\n", line_number);
+        }
+    }
+
+    fclose(fp);
 }
 
 int main() 
 {
-    srand((unsigned int)time(NULL));
+    srand((unsigned int) time(NULL));
 
     char user_input[32];
     DataType selected_type = UNKNOWN;
 
+    
     while (selected_type == UNKNOWN) 
     {
         printf("Digite o tipo de dado a ser gerado:\n");
@@ -93,7 +129,14 @@ int main()
         printf("  TEXTO   -> String (alfanumerica)\n");
         printf("  BINARIO -> Booleano (true/false)\n");
         printf("Opcao: ");
-        scanf("%s", user_input);
+
+        if (scanf("%31s", user_input) != 1) 
+        {
+           
+            fprintf(stderr, "Entrada invalida. Tente novamente.\n");
+            while (getchar() != '\n'); 
+            continue;
+        }
 
         selected_type = get_data_type_from_input(user_input);
 
@@ -103,16 +146,13 @@ int main()
         }
     }
 
+    
     Sensor sensors[MAX_SENSORS];
     for (int i = 0; i < MAX_SENSORS; i++) 
     {
-        char sensor_id[16];
-        snprintf(sensor_id, sizeof(sensor_id), "sensor%d", i + 1);
-        strcpy(sensors[i].id, sensor_id);
+        snprintf(sensors[i].id, sizeof(sensors[i].id), "sensor%d", i + 1);
         sensors[i].type = selected_type;
     }
-
-    int num_sensors = MAX_SENSORS;
 
     long start_time = time(NULL);
     long end_time = start_time + 60 * 60 * 24;
@@ -124,7 +164,8 @@ int main()
         return 1;
     }
 
-    for (int i = 0; i < num_sensors; i++) 
+    
+    for (int i = 0; i < MAX_SENSORS; i++) 
     {
         Sensor s = sensors[i];
 
@@ -139,6 +180,9 @@ int main()
 
     fclose(fp);
     printf("Arquivo 'teste_amostras.txt' gerado com sucesso!\n");
+
+   
+    validate_file_lines("teste_amostras.txt");
 
     return 0;
 }
